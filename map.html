@@ -1,0 +1,98 @@
+<div>
+  <canvas id="myChart"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://unpkg.com/chartjs-chart-geo@4.2.3/build/index.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3-array@3"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3-geo@3"></script>
+
+
+<script type="module">
+  fetch('http://127.0.0.1:8000/get_file').then((r) => r.json()).then((data) => {
+    // const countries = ChartGeo.topojson.feature(data, data.objects.countries).features;
+    const countries = ChartGeo.topojson.feature(data, data.objects.custom).features;
+    console.log(countries)
+
+    const projection = d3.geoEquirectangular();
+    // console.log(d3.geoEquirectangular().fitExtent([[0, 0], [width, height]], countries)); 
+    
+    let xMinLL = 25; let yMinLL = 21; let xMaxLL = 71; let yMaxLL = 179;
+    let xMinPix = 0; let yMaxPix = 0; let xMaxPix = 0; let yMinPix = 0;
+
+    let width = document.getElementById("myChart").width
+    let height = document.getElementById("myChart").height
+
+    // [xMinPix, yMinPix] = projection([xMinLL, yMinLL]);
+    // [xMaxPix, yMaxPix] = projection([xMaxLL, yMaxLL]);
+    console.log(1, [xMinPix, yMaxPix], [xMaxPix, yMinPix]);
+    const chart = new Chart(document.getElementById("myChart").getContext("2d"), {
+      type: 'choropleth',
+      data: {
+        labels: countries.map((d) => d.properties.name),
+        datasets: [{
+          label: 'Countries',
+          data: countries.map((d) => ({feature: d, value: Math.random()})),
+        }]
+      },
+      options: {
+        showOutline: true,
+        showGraticule: true,
+        plugins: {
+          legend: {
+            display: false
+          },
+        },
+        scales: {
+          projection: {
+            axis: 'x',
+            projection: projection.fitExtent([[0, 0], [width, height]], countries).scale(1).translate([-500, 0])//.rotate(0).postclip(d3.geoClipRectangle(0, 0, 1000 , 1000))
+            // projection: projection.postclip(d3.geoClipRectangle(xMinPix,
+            //                             yMinPix,
+            //                             xMaxPix,
+            //                             yMaxPix)).scale(1500)
+                                  // .rotate([96, 0])
+                                  // .center([-0.6, 38.7])
+          }
+        },
+      }
+    });
+  });
+  // whole US for the outline
+  // const nation = ChartGeo.topojson.feature(us, us.objects.nation).features[0];
+  // // individual states
+  // const states = ChartGeo.topojson.feature(us, us.objects.states).features;
+
+  // const alaska = states.find((d) => d.properties.name === 'Alaska');
+  // const california = states.find((d) => d.properties.name === 'California');
+
+  // const config = {
+  //   data: {
+  //     labels: ['Alaska', 'California'],
+  //     datasets: [{
+  //       label: 'States',
+  //       outline: nation, // ... outline to compute bounds
+  //       showOutline: true,
+  //       data: [
+  //         {
+  //           value: 0.4,
+  //           feature: alaska // ... the feature to render
+  //         },
+  //         {
+  //           value: 0.3,
+  //           feature: california
+  //         }
+  //       ]
+  //     }]
+  //   },
+  //   options: {
+  //     scales: {
+  //       projection: {
+  //         projection: 'albersUsa' // ... projection method
+  //       }
+  //     }
+  //   }
+  // };
+</script>
+
+
