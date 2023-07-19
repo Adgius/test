@@ -1,13 +1,14 @@
-from fastapi import FastAPI
-from fastapi.responses import FileResponse
+from fastapi import FastAPI, Request
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
-
+app.mount("/static", StaticFiles(directory="static"), name="static")
+templates = Jinja2Templates(directory="templates")
 
 origins = [
-    "http://localhost.tiangolo.com",
-    "https://localhost.tiangolo.com",
     "http://localhost",
     "http://localhost:8080"
 ]
@@ -31,10 +32,21 @@ app.add_middleware(
 #                    "Authorization"],
 # )
 
+@app.get("/", response_class=HTMLResponse)
+def map(request: Request):
+  return templates.TemplateResponse("test2.html", {"request": request})
+
 @app.get("/get_file")
 def download_file():
-  return FileResponse(path='custom.json')
+  return FileResponse(path='custom.geojson')
 
+@app.get("/get_file2")
+def download_file():
+  return FileResponse(path='all_countries.geojson')
+
+@app.get("/get_file3")
+def download_file():
+  return FileResponse(path='russia_geojson_wgs84.geojson')
 
 @app.on_event("shutdown")
 def disconnect():
